@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub Repo Chat</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <header class="header">
+    <span class="header-icon">🤖</span>
+    <div>
+      <div class="header-title">GitHub Repo Chat</div>
+      <div class="header-subtitle">Powered by OpenAI GPT</div>
+    </div>
+    <div class="header-badge" id="statusBadge">
+      <span class="badge-dot"></span>
+      <span id="statusText">Not indexed</span>
+    </div>
+  </header>
+
+  <!-- ── Repo Bar ─────────────────────────────────────────────────── -->
+  <div class="repo-bar">
+    
+    <div class="repo-header-toggle" id="repoHeaderToggle" style="display:none;">
+      <span>⚙️ Repository Settings</span>
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z" />
+      </svg>
+    </div>
+
+    <div class="repo-controls" id="repoControls">
+    <!-- Auto-detected repo display -->
+    <div class="repo-detected" id="repoDetected" style="display:none;">
+      <span class="repo-detected-icon">🔗</span>
+      <span class="repo-detected-text" id="repoDetectedText"></span>
+    </div>
+
+    <!-- Manual URL input (shown when not on a GitHub repo page) -->
+    <input type="text" class="repo-url-input" id="repoUrlInput" placeholder="https://github.com/owner/repo"
+      style="display:none;" />
+
+    <!-- Settings toggle -->
+    <div class="settings-toggle" id="settingsToggle">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.003-.312c.635-.198 1.36.146 1.616.789.331.82.553 1.674.654 2.553.085.74-.282 1.48-.921 1.875l-.945.586c-.058.036-.12.115-.132.253a5.984 5.984 0 0 1 0 .684c.012.138.074.217.132.253l.945.586c.639.395 1.006 1.134.921 1.875l-.014.124-.002.016a8.552 8.552 0 0 1-.64 2.413c-.256.643-.981.987-1.616.789l-1.003-.312c-.066-.02-.176-.012-.299.071a5.908 5.908 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.716 1.195-1.459 1.259A8.2 8.2 0 0 1 8 16a8.2 8.2 0 0 1-.701-.031c-.743-.064-1.289-.614-1.459-1.259l-.288-1.107c-.018-.066-.079-.158-.212-.224a5.908 5.908 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.003.312c-.635.198-1.36-.146-1.616-.789a8.552 8.552 0 0 1-.654-2.553c-.085-.74.282-1.48.921-1.875l.945-.586c.058-.036.12-.115.132-.253a5.984 5.984 0 0 1 0-.684c-.012-.138-.074-.217-.132-.253l-.945-.586c-.639-.395-1.006-1.134-.921-1.875a8.552 8.552 0 0 1 .654-2.553c.256-.643.981-.987 1.616-.789l1.003.312c.066.02.176.012.299-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.288-1.107C7.01.645 7.556.095 8.299.031A8.2 8.2 0 0 1 8 0Zm1.5 8a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0ZM8 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"></path>
+      </svg>
+      Settings &amp; Options
+      <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+        <path
+          d="M4.427 7.427l3.396 3.396a.25.25 0 00.354 0l3.396-3.396A.25.25 0 0011.396 7H4.604a.25.25 0 00-.177.427z" />
+      </svg>
+    </div>
+
+    <!-- Settings panel -->
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-grid">
+        <div class="setting-item">
+          <label>Model</label>
+          <select id="modelSelect">
+            <option value="gpt-4o-mini" selected>gpt-4o-mini (fast)</option>
+            <option value="gpt-4o">gpt-4o (best)</option>
+            <option value="gpt-3.5-turbo">gpt-3.5-turbo (cheap)</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label>Top-K chunks</label>
+          <input type="number" id="topK" value="4" min="1" max="15" />
+        </div>
+
+        <div class="setting-item">
+          <label>Chunk size</label>
+          <input type="number" id="chunkSize" value="1200" min="200" max="4000" step="100" />
+        </div>
+
+        <div class="setting-item">
+          <label>Overlap</label>
+          <input type="number" id="chunkOverlap" value="200" min="0" max="800" step="50" />
+        </div>
+
+        <div class="setting-item ext-input">
+          <div class="ext-header">
+            <label>File Extensions</label>
+            <div class="ext-actions">
+              <span id="selectAllExts">Select All</span>
+              <span id="clearExts">Clear</span>
+            </div>
+          </div>
+          <div class="multi-select" id="extMultiSelect">
+            <div class="tags-container" id="extTagsContainer">
+              <!-- Tags injected via JS -->
+            </div>
+            <input type="text" class="tag-input" id="extTagInput" placeholder="Add extension..." autocomplete="off" />
+            <div class="dropdown-list" id="extDropdown">
+              <!-- Options injected via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="index-btn" id="indexBtn">
+        <span id="indexBtnIcon">⚡</span>
+        <span id="indexBtnText">Index Repository</span>
+      </button>
+    </div> <!-- /repoControls -->
+  </div> <!-- /repo-bar -->
+
+  <!-- ── Chat section ─────────────────────────────────────────────── -->
+  <div class="chat-section">
+    <div class="chat-section-label">Conversation</div>
+
+    <div class="messages" id="messages">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-state-icon">💬</div>
+        <div class="empty-state-title">No messages yet</div>
+        <div class="empty-state-sub">Index a repository first, then ask anything about its code or README.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Chat Input ────────────────────────────────────────────────── -->
+  <div class="chat-input-wrap">
+    <textarea class="chat-input" id="chatInput" rows="1" placeholder="Ask about the repository…" disabled></textarea>
+    <button class="send-btn" id="sendBtn" disabled title="Send">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path
+          d="M.989 8 .064 2.68a1.342 1.342 0 011.85-1.462l13.402 5.744a1.13 1.13 0 010 2.076L1.913 14.782a1.342 1.342 0 01-1.85-1.463L.99 8.62l7.682-1.2-7.682-1.42z" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- ── Toast ─────────────────────────────────────────────────────── -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
